@@ -15,6 +15,13 @@ class ReporteEstadoImport implements ToModel, WithHeadingRow, WithBatchInserts, 
 
     public function model(array $row)
     {
+        // 1. Filtro DIRECTO 
+        $estado = isset($row['estado_fua']) ? trim($row['estado_fua']) : '';
+        
+        if ($estado !== 'OBSERVADO POR EL SIS') {
+            return null; 
+        }
+    
         // Excel header: "N° FUA" -> Laravel: "n_fua"
         if (!isset($row['n_fua'])) return null;
 

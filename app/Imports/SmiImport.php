@@ -4,6 +4,7 @@ namespace App\Imports;
 
 use App\Models\FuaSmi;
 use Maatwebsite\Excel\Concerns\ToModel;
+use App\Models\FuaAtencionDetallado;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithBatchInserts;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
@@ -13,6 +14,13 @@ class SmiImport implements ToModel, WithHeadingRow, WithBatchInserts, WithChunkR
     public function model(array $row)
     {
         if (!isset($row['fua'])) return null;
+
+        // --- VALIDACIÓN ---
+        $esValido = FuaAtencionDetallado::where('fua_id', $row['fua'])
+                    ->where('estado_fua', 'OBSERVADO POR EL SIS')
+                    ->exists();
+
+        if (!$esValido) return null;
 
         return new FuaSmi([
             'fua_id'                    => $row['fua'],

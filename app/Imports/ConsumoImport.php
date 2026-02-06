@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use App\Models\FuaConsumo;
+use App\Models\FuaAtencionDetallado;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithBatchInserts;
@@ -13,6 +14,17 @@ class ConsumoImport implements ToModel, WithHeadingRow, WithBatchInserts, WithCh
     public function model(array $row)
     {
         if (!isset($row['fua'])) return null;
+
+        // --- VALIDACIÓN CONTRA LA TABLA MAESTRA ---
+        // Buscamos si este FUA existe en la tabla principal Y si su estado es OBSERVADO.
+        // Si no existe (o tiene otro estado), ignoramos esta fila de consumo.
+        $esValido = FuaAtencionDetallado::where('fua_id', $row['fua'])
+                    ->where('estado_fua', 'OBSERVADO POR EL SIS')
+                    ->exists();
+
+        if (!$esValido) {
+            return null;
+        }
 
         return new FuaConsumo([
             'fua_id'                  => $row['fua'],

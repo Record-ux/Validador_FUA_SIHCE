@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use App\Models\FuaPrincipalAdicional;
+use App\Models\FuaAtencionDetallado;
 use App\Imports\Traits\DateTransformable;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
@@ -17,6 +18,14 @@ class PrincipalAdicionalImport implements ToModel, WithHeadingRow, WithBatchInse
     {
         // El header en excel es "N° Formato", laravel lo convierte a "n_formato"
         if (!isset($row['n_formato'])) return null;
+
+        // --- VALIDACIÓN ---
+        // Usamos 'n_formato' para buscar en la columna 'fua_id' del padre
+        $esValido = FuaAtencionDetallado::where('fua_id', $row['n_formato'])
+                    ->where('estado_fua', 'OBSERVADO POR EL SIS')
+                    ->exists();
+
+        if (!$esValido) return null;
 
         return new FuaPrincipalAdicional([
             'nro_formato'      => $row['n_formato'],

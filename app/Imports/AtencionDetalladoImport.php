@@ -16,6 +16,13 @@ class AtencionDetalladoImport implements ToModel, WithHeadingRow, WithBatchInser
 
     public function model(array $row)
     {
+        
+        $estado = isset($row['estado_fua']) ? trim($row['estado_fua']) : '';
+        
+        if ($estado !== 'OBSERVADO POR EL SIS') {
+            return null; 
+        }
+
         if (!isset($row['fua'])) return null;
 
         return new FuaAtencionDetallado([
@@ -36,7 +43,7 @@ class AtencionDetalladoImport implements ToModel, WithHeadingRow, WithBatchInser
             'edad'             => $row['edad'],
             'sexo'             => $row['sexo'],
             'historia_clinica' => $row['historia_clinica'],
-            'etnia'            => $row['etnia'],
+            'etnia'            => $row['etnia'] ?? null,
             'id_servicio'      => $row['id_servicio'],
             'servicio_descripcion' => $row['servicio'],
             'digitador'        => $row['digitador'] ?? null,
