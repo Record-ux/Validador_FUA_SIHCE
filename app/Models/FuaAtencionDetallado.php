@@ -22,4 +22,22 @@ class FuaAtencionDetallado extends Model
         'fecha_envio_sis'           => 'datetime',
 
     ];
+
+    // 1. Relación con Diagnósticos (Tabla Principal/Adicional)
+    public function diagnosticos()
+    {
+        return $this->hasMany(FuaPrincipalAdicional::class, 'nro_formato', 'fua_id');
+    }
+
+    // 2. Relación con Consumo (Medicamentos, Insumos, Procedimientos)
+    public function consumos()
+    {
+        return $this->hasMany(FuaConsumo::class, 'fua_id', 'fua_id');
+    }
+
+    // 3. Relación con Reporte Estado (Para ver el Código Prestacional real: 056, 906, etc)
+    public function reporte()
+    {
+        return $this->hasOne(FuaReporteEstado::class, 'fua_id', 'fua_id');
+    }
 }
