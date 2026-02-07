@@ -10,4 +10,15 @@ class FuaAtencionDetallado extends Model
     
     // Deshabilitamos la protección para poder hacer inserciones masivas rápidas
     protected $guarded = [];
+
+    // --- AGREGA ESTO PARA CORREGIR EL ERROR ---
+    protected $casts = [
+        'fecha_atencion'            => 'datetime',
+        'fecha_nacimiento_paciente' => 'date',
+        'fecha_registro'            => 'date',
+        'fecha_probable_parto'      => 'date',
+        'fecha_parto'               => 'date',
+        'fecha_ingreso'             => 'datetime',
+        'fecha_envio_sis'           => 'datetime',
+    ];
 }

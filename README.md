@@ -55,6 +55,9 @@ carlosgutierrezh0@gmail.com
 ## Controladores
 app/http/Controllers/Modulo_Fua     <- Aqui crear los controladores
 
+## Validadores (Regla de Consistencia)
+app/Services     <- Aqui crear los controladores
+
 ## Modelos
 app/Models     <- Aqui crear los modelos
 

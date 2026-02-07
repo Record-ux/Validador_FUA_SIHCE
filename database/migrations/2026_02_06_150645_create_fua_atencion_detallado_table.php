@@ -70,6 +70,12 @@ return new class extends Migration
             $table->dateTime('fecha_ingreso')->nullable();
             $table->dateTime('fecha_envio_sis')->nullable();
 
+            // --- NUEVOS CAMPOS PARA VALIDACIÓN DE REGLAS ---
+            // 0: Pendiente, 1: Válido, 2: Con Errores
+            $table->tinyInteger('estado_validacion')->default(0)->index(); 
+            // Aquí guardaremos el detalle del error
+            $table->text('observaciones_reglas')->nullable();
+
             $table->timestamps();
         });
     }

@@ -17,11 +17,16 @@ use App\Models\FuaSmi;
 use App\Models\FuaPrincipalAdicional;
 use App\Models\FuaReporteEstado;
 
+use App\Services\ReglasValidacionService;
+
 class FuaElectronicaController extends Controller
 {
     public function index()
     {
-        return view('modulos.modulo_fua.index');
+        // Traemos los registros ordenados por fecha, paginados de 15 en 15
+        $fuas = FuaAtencionDetallado::orderBy('created_at', 'desc')->paginate(15);
+        
+        return view('modulos.modulo_fua.index', compact('fuas'));
     }
 
     public function create()
@@ -86,6 +91,24 @@ class FuaElectronicaController extends Controller
         } catch (\Exception $e) {
             // Fallback si falla el formato (a veces Excel cambia formatos)
             return null; 
+        }
+    }
+
+    public function validarReglas(ReglasValidacionService $validador)
+    {
+        try {
+            $cantidadErrores = $validador->ejecutarValidacion();
+
+            if ($cantidadErrores > 0) {
+                return redirect()->route('fua.index')
+                    ->with('warning', "Se encontraron $cantidadErrores registros con observaciones. Revisa la lista.");
+            }
+
+            return redirect()->route('fua.index')
+                ->with('success', 'Validación exitosa: Todos los registros cumplen la norma técnica.');
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error al validar: ' . $e->getMessage());
         }
     }
 
