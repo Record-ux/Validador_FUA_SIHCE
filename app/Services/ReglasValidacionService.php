@@ -8,44 +8,47 @@ class ReglasValidacionService
 {
     public function ejecutarValidacion()
     {
-        // 1. Obtener todos los FUAs cargados
         $registros = FuaAtencionDetallado::all();
-        
-        $contadorErrores = 0;
+        $erroresEncontrados = 0;
 
         foreach ($registros as $fua) {
-            $errores = [];
+            $listaErrores = [];
+            $listaSoluciones = [];
 
-            // --- REGLA 1: Coherencia Sexo / Servicio (Ejemplo) ---
-            // Si es Masculino y el servicio es Ginecología u Obstetricia
-            if ($fua->sexo == 'M' && in_array($fua->servicio_descripcion, ['GINECOLOGIA', 'OBSTETRICIA'])) {
-                $errores[] = 'Error Normativo: Paciente MASCULINO no puede tener atenciones en GINECOLOGIA.';
-            }
-
-            // --- REGLA 2: Edad vs Pediatría ---
-            // Si tiene más de 18 años y se atendió en pediatría
-            if ($fua->edad > 18 && str_contains($fua->servicio_descripcion, 'PEDIATRIA')) {
-                $errores[] = 'Error Normativo: Paciente MAYOR DE EDAD atendido en PEDIATRIA.';
-            }
-
-            // --- REGLA 3: Validar DNI (Largo) ---
+            // --- REGLA 1: Validar DNI ---
             if ($fua->tipo_doc_paciente == '1' && strlen($fua->num_doc_paciente) != 8) {
-                 $errores[] = 'Error RENIEC: El DNI debe tener 8 dígitos.';
+                $listaErrores[] = 'DNI Inválido (Longitud incorrecta)';
+                $listaSoluciones[] = 'Verificar ficha RENIEC y corregir a 8 dígitos.';
             }
 
-            // --- GUARDAR RESULTADO ---
-            if (count($errores) > 0) {
-                $fua->estado_validacion = 2; // Con Errores
-                $fua->observaciones_reglas = implode(' | ', $errores);
-                $contadorErrores++;
+            // --- REGLA 2: Coherencia Sexo / Ginecología ---
+            if ($fua->sexo == 'M' && in_array($fua->servicio_descripcion, ['GINECOLOGIA', 'OBSTETRICIA'])) {
+                $listaErrores[] = 'Paciente MASCULINO en servicio Materno';
+                $listaSoluciones[] = 'Cambiar servicio a UROLOGÍA o MEDICINA GENERAL.';
+            }
+
+            // --- REGLA 3: Edad vs Pediatría (Ejemplo) ---
+            if ($fua->edad > 18 && str_contains($fua->servicio_descripcion, 'PEDIATRIA')) {
+                $listaErrores[] = 'Mayor de edad en PEDIATRIA';
+                $listaSoluciones[] = 'Derivar a MEDICINA ADULTO.';
+            }
+
+            // --- GUARDADO DE RESULTADOS ---
+            if (count($listaErrores) > 0) {
+                $fua->estado_validacion = 2; // ROJO
+                // Guardamos los arrays convertidos a texto separado por " | "
+                $fua->observaciones_reglas = implode(' | ', $listaErrores);
+                $fua->soluciones_reglas = implode(' | ', $listaSoluciones);
+                $erroresEncontrados++;
             } else {
-                $fua->estado_validacion = 1; // Válido
-                $fua->observaciones_reglas = null;
+                $fua->estado_validacion = 1; // VERDE
+                $fua->observaciones_reglas = 'Conforme';
+                $fua->soluciones_reglas = null;
             }
             
             $fua->save();
         }
 
-        return $contadorErrores;
+        return $erroresEncontrados;
     }
 }

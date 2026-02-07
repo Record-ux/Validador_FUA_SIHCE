@@ -75,6 +75,7 @@ return new class extends Migration
             $table->tinyInteger('estado_validacion')->default(0)->index(); 
             // Aquí guardaremos el detalle del error
             $table->text('observaciones_reglas')->nullable();
+            $table->text('soluciones_reglas')->nullable();
 
             $table->timestamps();
         });

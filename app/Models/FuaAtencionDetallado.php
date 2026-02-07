@@ -20,5 +20,6 @@ class FuaAtencionDetallado extends Model
         'fecha_parto'               => 'date',
         'fecha_ingreso'             => 'datetime',
         'fecha_envio_sis'           => 'datetime',
+
     ];
 }
